@@ -1,0 +1,7 @@
+langchain-core
+langchain-openai
+pydantic
+tqdm
+pandas
+pysubs2
+openpyxl

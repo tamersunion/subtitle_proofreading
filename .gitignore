@@ -1,0 +1,33 @@
+# 配置文件（包含敏感信息）
+config.json
+
+# 译名表数据文件
+data/*.xlsx
+data/*.xls
+data/*.xml
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 字幕文件
+*.ass
+
+# 输出文件
+result-*.txt
