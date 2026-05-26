@@ -95,7 +95,6 @@ def read_ass_as_xml(file: Path, splitter: str = r"\N{\fnG-OTF Jo Shin Maru Go Pr
         text = line.text
         if len(text.strip()) == 0:
             continue
-        splitter = r"\N{\fnG-OTF Jo Shin Maru Go ProN M\fs45}"
         if splitter not in text:
             print(f"[AI检查] [{start_time}] [拆行失败] 字幕行未找到中日文分隔符，已跳过：{text}")
             continue
