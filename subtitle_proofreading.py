@@ -26,13 +26,13 @@ def download_glossary_from_webdav() -> Path:
     base_url = webdav_cfg.get("base_url", "").rstrip("/")
     username = webdav_cfg.get("username", "")
     password = webdav_cfg.get("password", "")
-    filepath = webdav_cfg.get("filepath", "驯兽师联盟译名表.xlsx")
+    filepath = webdav_cfg.get("filepath", "path/to/glossary.xlsx")
 
     if not base_url or not username or not password:
         raise ValueError("WebDAV 配置不完整，请检查 config.json 中的 webdav 字段")
 
     download_url = f"{base_url}/{quote(filepath)}"
-    local_path = Path(webdav_cfg.get("local_path", "./译名表.xlsx"))
+    local_path = Path(webdav_cfg.get("local_path", "data/glossary.xlsx"))
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
     creds = base64.b64encode(f"{username}:{password}".encode()).decode()
