@@ -4,6 +4,7 @@
 import argparse
 import json
 import base64
+import re
 import urllib.request
 from urllib.parse import quote
 from pathlib import Path
@@ -18,6 +19,8 @@ with _CONFIG_PATH.open("r", encoding="utf-8") as _cf:
 
 now = datetime.now()
 timestamp = now.strftime(CONFIG.get("timestamp_format", "%Y%m%d-%H%M%S-%f"))
+
+_TIMESTAMP_RE = re.compile(r"[\[【](\d{2}):(\d{2}):(\d{2})\.(\d{2})[\]】]")
 
 
 def download_glossary_from_webdav() -> Path:
@@ -56,6 +59,44 @@ def download_glossary_from_webdav() -> Path:
 class WideHelpFormatter(argparse.RawDescriptionHelpFormatter):
     def __init__(self, prog):
         super().__init__(prog, max_help_position=40, width=100)
+
+
+def _timestamp_sort_key(line: str, index: int) -> tuple[int, int]:
+    match = _TIMESTAMP_RE.search(line)
+    if not match:
+        return (10**12, index)
+
+    hours, minutes, seconds, centiseconds = map(int, match.groups())
+    total_centiseconds = (
+        ((hours * 60 + minutes) * 60 + seconds) * 100 + centiseconds
+    )
+    return (total_centiseconds, index)
+
+
+def _normalize_timestamp_brackets(line: str) -> str:
+    return _TIMESTAMP_RE.sub(
+        lambda match: (
+            f"[{match.group(1)}:{match.group(2)}:{match.group(3)}.{match.group(4)}]"
+        ),
+        line,
+        count=1,
+    )
+
+
+def sort_results_by_timestamp(results: list[str]) -> list[str]:
+    lines = [
+        _normalize_timestamp_brackets(line.strip())
+        for result in results
+        for line in result.splitlines()
+        if line.strip()
+    ]
+    return [
+        line
+        for _, line in sorted(
+            enumerate(lines),
+            key=lambda item: _timestamp_sort_key(item[1], item[0]),
+        )
+    ]
 
 
 async def main():
@@ -114,8 +155,8 @@ async def main():
     # 2. AI 动态检查（结果已在函数内实时打印）
     ai_results = await check_ass(assfile, CONFIG.get("chunk_size", 30), splitter, style)
 
-    # 合并输出到文件
-    total_response = static_results + ai_results
+    # 合并输出到文件前，按时间戳升序排序
+    total_response = sort_results_by_timestamp(static_results + ai_results)
     with output.open("w", encoding="utf-8") as ofs:
         ofs.write("\n".join(total_response))
 
