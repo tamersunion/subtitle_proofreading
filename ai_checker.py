@@ -135,8 +135,7 @@ async def _check_chunk_with_label(chunk: list[str], category: str, strParser: St
             if match:
                 timestamp, rest = match.groups()
                 output_lines.append(f"{prefix} [{timestamp}] {rest}")
-            else:
-                output_lines.append(f"{prefix} {line}")
+            # 没有时间戳的行直接过滤掉，不输出（如 AI 的总结性语句）
         output = "\n".join(output_lines)
         print(output)
         return output
